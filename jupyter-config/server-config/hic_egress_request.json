@@ -1,0 +1,7 @@
+{
+  "ServerApp": {
+    "jpserver_extensions": {
+      "hic_egress_request": true
+    }
+  }
+}

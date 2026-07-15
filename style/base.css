@@ -1,0 +1,61 @@
+.jp-DropTarget {
+  min-height: 200px;
+  padding: var(--jp-cell-padding, 8px);
+  border: 2px dashed var(--jp-border-color2);
+  border-radius: var(--jp-border-radius, 2px);
+  overflow: auto;
+  background-color: var(--jp-layout-color1);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DropTarget.jp-mod-active {
+  border-color: var(--jp-brand-color1);
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DropTarget-placeholder {
+  color: var(--jp-ui-font-color2);
+  padding: 8px;
+}
+
+.jp-DropTarget-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-DropTarget-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--jp-border-color2);
+}
+
+.jp-DropTarget-row:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DropTarget-icon {
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.jp-DropTarget-label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jp-DropTarget-remove {
+  margin-left: 6px;
+  border: none;
+  background: transparent;
+  color: var(--jp-ui-font-color2);
+  cursor: pointer;
+}
+
+.jp-DropTarget-remove:hover {
+  color: var(--jp-error-color1);
+}

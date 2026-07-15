@@ -1,0 +1,8 @@
+{
+  "jupyter.lab.shortcuts": [],
+  "title": "hic-egress-request",
+  "description": "hic-egress-request settings.",
+  "type": "object",
+  "properties": {},
+  "additionalProperties": false
+}
