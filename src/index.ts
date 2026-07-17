@@ -10,6 +10,7 @@ import { Widget } from '@lumino/widgets';
 import { Message } from '@lumino/messaging';
 import { Drag } from '@lumino/dragdrop';
 import { fileIcon, folderIcon } from '@jupyterlab/ui-components';
+import { requestAPI } from './request';
 
 /**
  * The mime type used by the JupyterLab file browser for dragged file contents.
@@ -177,18 +178,11 @@ class DropTargetWidget extends Widget {
   this._statusLabel.className = 'jp-DropTarget-status';
 
   try {
-    const response = await fetch('https://your-service.example.com/api/files', {
+    const data = await requestAPI<any>('send-files', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({ paths: this._droppedPaths })
     });
-
-    if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
-    }
-
+    console.log(data);
     this._statusLabel.textContent = 'Sent successfully';
     this._statusLabel.classList.add('jp-DropTarget-status-success');
   } catch (error) {

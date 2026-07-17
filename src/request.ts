@@ -12,13 +12,14 @@ import { ServerConnection } from '@jupyterlab/services';
  */
 export async function requestAPI<T>(
   endPoint: string,
-  serverSettings: ServerConnection.ISettings,
   init: RequestInit = {}
 ): Promise<T> {
-  // Make request to Jupyter API
+
+  const serverSettings = ServerConnection.makeSettings(); 
+  
   const requestUrl = URLExt.join(
     serverSettings.baseUrl,
-    'hic-egress-request', // our server extension's API namespace
+    'hic-egress-request',
     endPoint
   );
 
