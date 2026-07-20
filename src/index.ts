@@ -7,7 +7,7 @@ import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { Widget } from '@lumino/widgets';
 import { Message } from '@lumino/messaging';
 import { Drag } from '@lumino/dragdrop';
-import { fileIcon, folderIcon } from '@jupyterlab/ui-components';
+import { fileIcon } from '@jupyterlab/ui-components';
 import { requestAPI } from './request';
 import { Contents } from '@jupyterlab/services';
 
@@ -62,9 +62,7 @@ class DropTargetWidget extends Widget {
     const row = document.createElement('li');
     row.className = 'jp-DropTarget-row';
 
-    const isDir = !path.includes('.') || path.endsWith('/');
-    const icon = isDir ? folderIcon : fileIcon;
-    const iconNode = icon.element({
+    const iconNode = fileIcon.element({
       tag: 'span',
       width: '16px',
       height: '16px'

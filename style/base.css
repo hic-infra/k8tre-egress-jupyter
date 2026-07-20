@@ -48,6 +48,10 @@
   white-space: nowrap;
 }
 
+.jp-DropTarget-status {
+  padding: 2px 8px;
+}
+
 .jp-DropTarget-remove {
   margin-left: 6px;
   border: none;
