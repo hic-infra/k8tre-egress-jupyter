@@ -4,7 +4,10 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-load_dotenv(dotenv_path=Path(__file__).parent / ".env")
+result = load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
+print(Path(__file__).parent.parent / ".env")
+print(f"dotenv loaded: {result}")  # False = file not found or empty
+
 
 class EgressRequestConfig(Configurable):
     aws_endpoint_url = Unicode(config=True)
@@ -18,19 +21,19 @@ class EgressRequestConfig(Configurable):
     @default("aws_access_key_id")
     def _default_aws_access_key_id(self):
         return os.environ.get("aws_access_key_id", "")
-    
+
     aws_secret_access_key = Unicode(config=True)
 
     @default("aws_secret_access_key")
     def _default_aws_secret_access_key(self):
         return os.environ.get("aws_secret_access_key", "")
-    
+
     aws_region_name = Unicode(config=True)
 
     @default("aws_region_name")
     def _default_region_name(self):
         return os.environ.get("aws_region_name", "")
-    
+
     s3_bucket_name = Unicode(config=True)
 
     @default("s3_bucket_name")

@@ -9,6 +9,7 @@ from botocore.client import Config
 import jwt
 import uuid
 
+
 def get_seaweed_client():
     config = EgressRequestConfig()
     return boto3.client(
@@ -20,10 +21,12 @@ def get_seaweed_client():
         region_name=config.aws_region_name,
     )
 
+
 class EgressRequestHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         config = EgressRequestConfig()
+        print(config.trait_values())
         data = self.get_json_body()
         if data is None:
             self.set_status(400)
@@ -54,7 +57,11 @@ class EgressRequestHandler(APIHandler):
 
         # Create the jwt
         project_id = uuid.uuid4()
-        token = jwt.encode({"projectId": str(project_id), "userId": "", "bucketId": config.s3_bucket_name}, "secret", algorithm="HS256")
+        token = jwt.encode(
+            {"projectId": "5", "userId": "", "bucketId": config.s3_bucket_name},
+            config.jwt_secret_key,
+            algorithm="HS256",
+        )
 
         self.finish(json.dumps({"status": "ok", "uploaded": uploaded, "token": token}))
 
@@ -62,11 +69,14 @@ class EgressRequestHandler(APIHandler):
         root_dir = self.contents_manager.root_dir
         return f"{root_dir}/{relative_path}"
 
+
 def setup_route_handlers(web_app):
     host_pattern = ".*$"
     base_url = web_app.settings["base_url"]
 
-    send_files_route_pattern = url_path_join(base_url, "hic-egress-request", "send-files")
+    send_files_route_pattern = url_path_join(
+        base_url, "hic-egress-request", "send-files"
+    )
 
     handlers = [(send_files_route_pattern, EgressRequestHandler)]
 

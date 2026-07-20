@@ -14,9 +14,8 @@ export async function requestAPI<T>(
   endPoint: string,
   init: RequestInit = {}
 ): Promise<T> {
+  const serverSettings = ServerConnection.makeSettings();
 
-  const serverSettings = ServerConnection.makeSettings(); 
-  
   const requestUrl = URLExt.join(
     serverSettings.baseUrl,
     'hic-egress-request',
