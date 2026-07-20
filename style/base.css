@@ -48,6 +48,10 @@
   white-space: nowrap;
 }
 
+.jp-DropTarget-sendButton {
+  margin-top: 12px;
+}
+
 .jp-DropTarget-status {
   padding: 2px 8px;
 }
