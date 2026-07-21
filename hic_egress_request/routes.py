@@ -8,6 +8,7 @@ import boto3
 from botocore.client import Config
 import jwt
 import uuid
+from tornado.web import HTTPError
 
 
 def get_seaweed_client():
@@ -26,44 +27,45 @@ class EgressRequestHandler(APIHandler):
     @tornado.web.authenticated
     def post(self):
         config = EgressRequestConfig()
-        print(config.trait_values())
         data = self.get_json_body()
+
         if data is None:
-            self.set_status(400)
-            self.finish(json.dumps({"error": "Request body must be valid JSON"}))
-            return
+            raise HTTPError(400, reason="Request body must be valid JSON")
 
         paths = data.get("paths", [])
         if not paths:
-            self.set_status(400)
-            self.finish(json.dumps({"error": "No paths provided"}))
-            return
-
+            raise HTTPError(400, reason="No paths provided")
         client = get_seaweed_client()
         bucket = config.s3_bucket_name
         uploaded = []
+        try:
+            for path in paths:
+                # `path` here is the workspace-relative path from the file browserz drop;
+                # resolve it against your actual notebook root/contents dir
+                local_path = self._resolve_local_path(path)
+                key = path.lstrip("/")
 
-        for path in paths:
-            # `path` here is the workspace-relative path from the file browser drop;
-            # resolve it against your actual notebook root/contents dir
-            local_path = self._resolve_local_path(path)
-            key = path.lstrip("/")
-
-            try:
                 client.upload_file(local_path, bucket, key)
                 uploaded.append(key)
-            except Exception as e:
-                self.log.error(f"Failed to upload {path} to SeaweedFS: {e}")
 
-        # Create the jwt
-        project_id = uuid.uuid4()
-        token = jwt.encode(
-            {"projectId": "5", "userId": "", "bucketId": config.s3_bucket_name},
-            config.jwt_secret_key,
-            algorithm="HS256",
-        )
+                # Create the jwt
+                project_id = uuid.uuid4()
+                token = jwt.encode(
+                    {"projectId": "5", "userId": "", "bucketId": config.s3_bucket_name},
+                    config.jwt_secret_key,
+                    algorithm="HS256",
+                )
 
-        self.finish(json.dumps({"status": "ok", "uploaded": uploaded, "token": token}))
+            self.finish(
+                json.dumps({"status": "ok", "uploaded": uploaded, "token": token})
+            )
+        except Exception as e:
+            self.log.error(f"Failed to upload {path} to SeaweedFS: {e}")
+            raise HTTPError(500, reason="Cannot connect to S3")
+
+    def write_error(self, status_code, **kwargs):
+        self.set_header("Content-Type", "application/json")
+        self.finish(json.dumps({"error": self._reason}))
 
     def _resolve_local_path(self, relative_path: str) -> str:
         root_dir = self.contents_manager.root_dir
