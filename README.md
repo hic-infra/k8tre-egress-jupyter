@@ -1,7 +1,5 @@
 # hic_egress_request
 
-[![Github Actions Status](/workflows/Build/badge.svg)](/actions/workflows/build.yml)
-
 A JupyterLab extension to create egress requests in the K8TRE TRE
 
 This extension is composed of a Python package named `hic_egress_request`
