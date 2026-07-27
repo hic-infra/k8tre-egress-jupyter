@@ -3,7 +3,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { Widget } from '@lumino/widgets';
 import { Message } from '@lumino/messaging';
 import { Drag } from '@lumino/dragdrop';
@@ -237,7 +236,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: 'hic-egress-request',
   description: 'An extension to allow users in HIC to request file egress',
   autoStart: true,
-  requires: [ICommandPalette, IFileBrowserFactory],
+  requires: [ICommandPalette],
   activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
     const newWidget = () => {
       const content = new DropTargetWidget();

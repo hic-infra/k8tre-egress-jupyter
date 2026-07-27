@@ -6,3 +6,4 @@ node_modules
 hic_egress_request
 eslint.config.mjs
 .venv
+**/.ipynb_checkpoints/**
