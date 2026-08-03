@@ -115,7 +115,7 @@ test.describe('Drag-and-drop file upload', () => {
     // folder must not appear in the egress list
     await expect(page.locator(FILE_ITEM)).not.toContainText(folderName);
 
-    await expect(page.locator('.jp-DropTarget-status')).toContainText(
+    await expect(page.locator(SUCCESS_STATUS)).toContainText(
       'Folders are not supported — 1 folder skipped'
     );
   });
@@ -146,7 +146,7 @@ async function dropFiles(page, files: DropFile[]) {
   }, files);
 
   for (const f of files) {
-    const fileItem = page.locator('.jp-DirListing-item', {
+    const fileItem = await page.locator('.jp-DirListing-item', {
       hasText: f.filename
     });
     const dropzone = page.locator(DROPZONE);
