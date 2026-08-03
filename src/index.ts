@@ -249,7 +249,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     };
     let widget = newWidget();
 
-    const command: string = 'apod:open';
+    const command: string = 'egress-request:open';
     app.commands.addCommand(command, {
       label: 'Request Egress',
       execute: () => {
