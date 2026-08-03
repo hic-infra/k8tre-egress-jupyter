@@ -5,12 +5,12 @@ import { expect, test } from '@jupyterlab/galata';
  * This is required to ensure we capture all log messages.
  */
 test.use({ autoGoto: false });
- 
+
 const DROPZONE = '.jp-DropTarget-placeholder';
 const FILE_LIST_ITEM = '.jp-DropTarget-list';
 const UPLOAD_BUTTON = '.jp-DropTarget-sendButton';
 const SUCCESS_STATUS = '.jp-DropTarget-status';
- 
+
 test.describe('Drag-and-drop file upload', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto();
@@ -18,15 +18,15 @@ test.describe('Drag-and-drop file upload', () => {
       await window.jupyterapp.commands.execute('egress-request:open');
     });
   });
- 
+
   test('accepts a valid file on drop', async ({ page }) => {
     await dropFile(page);
- 
+
     await expect(page.locator(FILE_LIST_ITEM)).toHaveCount(1);
     await expect(page.locator(FILE_LIST_ITEM)).toContainText('results.csv');
     await expect(page.locator(UPLOAD_BUTTON)).toBeEnabled();
   });
- 
+
   /*test('accepts multiple files on drop', async ({ page }) => {
     await dropFiles(page, DROPZONE, [
       { name: 'a.csv', mimeType: 'text/csv', content: '1' },
@@ -35,20 +35,20 @@ test.describe('Drag-and-drop file upload', () => {
  
     await expect(page.locator(FILE_LIST_ITEM)).toHaveCount(2);
   });*/
- 
+
   test('removes active state after drop', async ({ page }) => {
     const dropzone = page.locator(DROPZONE);
- 
+
     await dropFile(page);
 
     await expect(dropzone).not.toHaveAttribute('data-drag-active', 'true');
   });
- 
+
   test('uploads the file when upload is clicked', async ({ page }) => {
     await dropFile(page);
- 
+
     await page.locator(UPLOAD_BUTTON).click();
- 
+
     await expect(page.locator(SUCCESS_STATUS)).toBeVisible();
   });
 });
@@ -62,7 +62,9 @@ async function dropFile(page) {
     });
   });
 
-  const fileItem = page.locator('.jp-DirListing-item', { hasText: 'results.csv' });
+  const fileItem = page.locator('.jp-DirListing-item', {
+    hasText: 'results.csv'
+  });
   const dropzone = page.locator(DROPZONE);
 
   const source = await fileItem.boundingBox();
