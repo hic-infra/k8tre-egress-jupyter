@@ -45,7 +45,7 @@ test.describe('Drag-and-drop file upload', () => {
     await expect(page.locator(UPLOAD_BUTTON)).toBeEnabled();
   });
 
-  // This currently fails on Github actions - I think because the 
+  // This currently fails on Github actions - I think because the
   // test runs slowly. To be fixed at some point.
   /*test('accepts multiple files on drop', async ({ page }) => {
     await dropFiles(page, [
