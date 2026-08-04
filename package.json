@@ -27,7 +27,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": ".git"
+        "url": "https://github.com/hic-infra/k8tre-egress-jupyter.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",
@@ -68,6 +68,7 @@
         "@eslint/js": "^9.0.0",
         "@jupyter/builder": "^1.0.0",
         "@jupyter/eslint-plugin": "^0.0.5",
+        "@jupyterlab/galata": "^5.5.10",
         "@jupyterlab/testutils": "^4.0.0",
         "@types/jest": "^29.2.0",
         "@types/json-schema": "^7.0.11",

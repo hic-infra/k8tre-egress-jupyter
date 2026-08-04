@@ -23,7 +23,11 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "jupyter_server>=2.4.0,<3"
+    "jupyter_server>=2.4.0,<3", 
+    "python-dotenv>=1.2.2",
+    "boto3>=1.43.48",
+    "botocore==1.43.48",
+    "PyJWT==2.13.0"
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 

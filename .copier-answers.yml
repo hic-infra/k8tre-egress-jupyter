@@ -1,0 +1,17 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v4.6.2
+_src_path: https://github.com/jupyterlab/extension-template
+advanced: false
+author_email: tmillington001@dundee.ac.uk
+author_name: Tristan Millington
+has_ai_rules: false
+has_binder: false
+has_settings: true
+kind: frontend-and-server
+labextension_name: hic-egress-request
+project_short_description: A JupyterLab extension to create egress requests in the
+    K8TRE TRE
+python_name: hic_egress_request
+repository: ''
+test: true
+

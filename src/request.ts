@@ -39,6 +39,7 @@ export async function requestAPI<T>(
     try {
       data = JSON.parse(data);
     } catch (error) {
+      console.log('Error occured.', error);
       console.log('Not a JSON response body.', response);
     }
   }
