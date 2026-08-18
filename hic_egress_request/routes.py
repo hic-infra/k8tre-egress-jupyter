@@ -33,17 +33,21 @@ class EgressRequestHandler(APIHandler):
             )
         data = resp.json()
         session_id = data["token"]
-
+        uploaded = []
         for path in paths:
             with httpx.Client() as client:
-                with open(path, "rb") as report_file:
-                    files = {"file": report_file}
-                    resp = client.post(
-                        f"{self.config.hic_egress_creation_service_url}/upload-file",
-                        headers={"Authorization": f"token {user_token}"},
-                        data={"session_id": session_id},
-                        files=files,
-                    )
+                try:
+                    with open(path, "rb") as f:
+                        files = {"file": f}
+                        resp = client.post(
+                            f"{self.config.hic_egress_creation_service_url}/upload-file",
+                            headers={"Authorization": f"token {user_token}"},
+                            data={"session_id": session_id},
+                            files=files,
+                        )
+                        uploaded.append(f)
+                except FileNotFoundError as e:
+                    raise HTTPError(400, reason="File not found")
 
         with httpx.Client() as client:
             resp = client.post(
