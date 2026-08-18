@@ -4,29 +4,16 @@ from hic_egress_request.config import EgressRequestConfig
 from jupyter_server.base.handlers import APIHandler
 from jupyter_server.utils import url_path_join
 import tornado
-import boto3
-from botocore.client import Config
-import jwt
-import uuid
 from tornado.web import HTTPError
-
-
-def get_seaweed_client():
-    config = EgressRequestConfig()
-    return boto3.client(
-        "s3",
-        endpoint_url=config.aws_endpoint_url,  # SeaweedFS S3 gateway address
-        aws_access_key_id=config.aws_access_key_id,
-        aws_secret_access_key=config.aws_secret_access_key,
-        config=Config(signature_version="s3v4"),
-        region_name=config.aws_region_name,
-    )
+import os
+import httpx
 
 
 class EgressRequestHandler(APIHandler):
+    config = EgressRequestConfig()
+
     @tornado.web.authenticated
     def post(self):
-        config = EgressRequestConfig()
         data = self.get_json_body()
 
         if data is None:
@@ -35,33 +22,58 @@ class EgressRequestHandler(APIHandler):
         paths = data.get("paths", [])
         if not paths:
             raise HTTPError(400, reason="No paths provided")
-        client = get_seaweed_client()
-        bucket = config.s3_bucket_name
-        uploaded = []
-        try:
-            for path in paths:
-                # `path` here is the workspace-relative path from the file browserz drop;
-                # resolve it against your actual notebook root/contents dir
-                local_path = self._resolve_local_path(path)
-                key = path.lstrip("/")
 
-                client.upload_file(local_path, bucket, key)
-                uploaded.append(key)
+        paths = list(map(self._resolve_local_path, paths))
 
-                # Create the jwt
-                project_id = uuid.uuid4()
-                token = jwt.encode(
-                    {"projectId": "5", "userId": "", "bucketId": config.s3_bucket_name},
-                    config.jwt_secret_key,
-                    algorithm="HS256",
-                )
-
-            self.finish(
-                json.dumps({"status": "ok", "uploaded": uploaded, "token": token})
+        user_token = os.environ.get("JUPYTERHUB_API_TOKEN")
+        with httpx.Client() as client:
+            resp = client.post(
+                f"{self.config.hic_egress_creation_service_url}/create-egress",
+                headers={"Authorization": f"token {user_token}"},
             )
-        except Exception as e:
-            self.log.error(f"Failed to upload {path} to SeaweedFS: {e}")
-            raise HTTPError(500, reason="Cannot connect to S3")
+        data = resp.json()
+        session_id = data["token"]
+        uploaded = []
+        for path in paths:
+            with httpx.Client() as client:
+                try:
+                    with open(path, "rb") as f:
+                        files = {"file": f}
+                        resp = client.post(
+                            f"{self.config.hic_egress_creation_service_url}/upload-file",
+                            headers={"Authorization": f"token {user_token}"},
+                            data={"session_id": session_id},
+                            files=files,
+                        )
+                        uploaded.append(f)
+                except FileNotFoundError as e:
+                    raise HTTPError(400, reason="File not found")
+
+        with httpx.Client() as client:
+            resp = client.post(
+                f"{self.config.hic_egress_creation_service_url}/request-egress",
+                headers={"Authorization": f"token {user_token}"},
+                data={"session_id": session_id},
+            )
+        self.set_status(resp.status_code)
+        self.finish(resp.text)
+
+    @tornado.web.authenticated
+    def get(self):
+        # the user's own Hub API token, set by JupyterHub in this pod's env
+        user_token = os.environ.get("JUPYTERHUB_API_TOKEN")
+        SERVICE_URL_BASE = os.environ.get(
+            "HIC_EGRESS_SERVICE_URL", "http://127.0.0.1:8080"
+        )
+        SERVICE_URL = f"{SERVICE_URL_BASE}/hello"
+        with httpx.Client() as client:
+            resp = client.get(
+                SERVICE_URL,
+                headers={"Authorization": f"token {user_token}"},
+            )
+
+        self.set_status(resp.status_code)
+        self.finish(resp.text)
 
     def write_error(self, status_code, **kwargs):
         self.set_header("Content-Type", "application/json")

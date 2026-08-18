@@ -25,9 +25,6 @@ classifiers = [
 dependencies = [
     "jupyter_server>=2.4.0,<3", 
     "python-dotenv>=1.2.2",
-    "boto3>=1.43.48",
-    "botocore==1.43.48",
-    "PyJWT==2.13.0"
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 
@@ -41,7 +38,8 @@ test = [
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
-    "pytest-jupyter[server]>=0.6.0"
+    "pytest-jupyter[server]>=0.6.0",
+    "respx==0.23.1",
 ]
 
 [tool.hatch.version]
