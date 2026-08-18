@@ -38,7 +38,8 @@ test = [
     "pytest",
     "pytest-asyncio",
     "pytest-cov",
-    "pytest-jupyter[server]>=0.6.0"
+    "pytest-jupyter[server]>=0.6.0",
+    "respx==0.23.1",
 ]
 
 [tool.hatch.version]
