@@ -9,7 +9,6 @@ import { Drag } from '@lumino/dragdrop';
 import { fileIcon } from '@jupyterlab/ui-components';
 import { requestAPI } from './request';
 import { Contents } from '@jupyterlab/services';
-
 /**
  * The mime type used by the JupyterLab file browser for dragged file contents.
  * Not exported publicly by @jupyterlab/filebrowser, so we mirror it here.
@@ -145,35 +144,50 @@ class DropTargetWidget extends Widget {
 
     event.dropAction = event.proposedAction;
 
-    const paths = event.mimeData.getData(CONTENTS_MIME) as string[];
+    const sentPaths = event.mimeData.getData(CONTENTS_MIME) as string[];
 
     if (!this._contentsManager) {
       // Fall back to accepting everything if we somehow have no contents manager
-      for (const path of paths) {
-        if (!this._droppedPaths.includes(path)) {
-          this._droppedPaths.push(path);
-          this._addFileRow(path);
+      for (const sentPath of sentPaths) {
+        if (!this._droppedPaths.includes(sentPath)) {
+          this._droppedPaths.push(sentPath);
+          this._addFileRow(sentPath);
         }
       }
       return;
     }
 
+    // Check if any of the files have duplicate names
+    let duplicateNames = 0;
+
     let skippedFolders = 0;
 
-    for (const path of paths) {
-      if (this._droppedPaths.includes(path)) {
-        continue;
+    for (const sentPath of sentPaths) {
+      if (this._droppedPaths.includes(sentPath)) {
+        duplicateNames++;
+        continue
+      } 
+
+      for (const currentPath of this._droppedPaths) {
+        const sentPathFilename = this.getFilename(sentPath);
+        const currentFile = this.getFilename(currentPath);
+
+        if (sentPathFilename == currentFile) {
+          duplicateNames++;
+          continue
+        }
       }
+
       try {
-        const model = await this._contentsManager.get(path, { content: false });
+        const model = await this._contentsManager.get(sentPath, { content: false });
         if (model.type === 'directory') {
           skippedFolders++;
           continue;
         }
-        this._droppedPaths.push(path);
-        this._addFileRow(path);
+        this._droppedPaths.push(sentPath);
+        this._addFileRow(sentPath);
       } catch (error) {
-        console.error(`Could not resolve dropped path "${path}":`, error);
+        console.error(`Could not resolve dropped path "${sentPath}":`, error);
       }
     }
 
@@ -184,7 +198,15 @@ class DropTargetWidget extends Widget {
           : `Folders are not supported — ${skippedFolders} folders skipped`;
       this._statusLabel.className =
         'jp-DropTarget-status jp-DropTarget-status-error';
-    } else {
+    } else if (duplicateNames > 0) {
+      this._statusLabel.textContent =
+        duplicateNames === 1
+          ? `Duplicate filenames are not supported - 1 file skipped`
+          : `Duplicate filenames are not supported — ${duplicateNames} files skipped`;
+      this._statusLabel.className =
+        'jp-DropTarget-status jp-DropTarget-status-error';
+    } 
+    else {
       this._statusLabel.textContent = '';
       this._statusLabel.className = 'jp-DropTarget-status';
     }
@@ -224,6 +246,10 @@ class DropTargetWidget extends Widget {
       this._sendButton.disabled = this._droppedPaths.length === 0;
     }
   }
+
+  private getFilename(filePath: string): string {
+    return filePath.split('/').pop() || '';
+  };
 
   // In DropTargetWidget:
   set contentsManager(manager: Contents.IManager) {
