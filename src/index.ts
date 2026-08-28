@@ -167,6 +167,7 @@ class DropTargetWidget extends Widget {
         duplicateNames++;
         continue
       } 
+      let found = false;
 
       for (const currentPath of this._droppedPaths) {
         const sentPathFilename = this.getFilename(sentPath);
@@ -174,8 +175,13 @@ class DropTargetWidget extends Widget {
 
         if (sentPathFilename == currentFile) {
           duplicateNames++;
-          continue
+          found = true;
+          break;
         }
+      }
+      
+      if (found) {
+        continue
       }
 
       try {
