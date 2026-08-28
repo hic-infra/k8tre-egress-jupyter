@@ -165,27 +165,29 @@ class DropTargetWidget extends Widget {
     for (const sentPath of sentPaths) {
       if (this._droppedPaths.includes(sentPath)) {
         duplicateNames++;
-        continue
-      } 
+        continue;
+      }
       let found = false;
 
       for (const currentPath of this._droppedPaths) {
         const sentPathFilename = this.getFilename(sentPath);
         const currentFile = this.getFilename(currentPath);
 
-        if (sentPathFilename == currentFile) {
+        if (sentPathFilename === currentFile) {
           duplicateNames++;
           found = true;
           break;
         }
       }
-      
+
       if (found) {
-        continue
+        continue;
       }
 
       try {
-        const model = await this._contentsManager.get(sentPath, { content: false });
+        const model = await this._contentsManager.get(sentPath, {
+          content: false
+        });
         if (model.type === 'directory') {
           skippedFolders++;
           continue;
@@ -211,8 +213,7 @@ class DropTargetWidget extends Widget {
           : `Duplicate filenames are not supported — ${duplicateNames} files skipped`;
       this._statusLabel.className =
         'jp-DropTarget-status jp-DropTarget-status-error';
-    } 
-    else {
+    } else {
       this._statusLabel.textContent = '';
       this._statusLabel.className = 'jp-DropTarget-status';
     }
@@ -255,7 +256,7 @@ class DropTargetWidget extends Widget {
 
   private getFilename(filePath: string): string {
     return filePath.split('/').pop() || '';
-  };
+  }
 
   // In DropTargetWidget:
   set contentsManager(manager: Contents.IManager) {
