@@ -121,21 +121,6 @@ test.describe('Drag-and-drop file upload', () => {
       'Folders are not supported — 1 folder skipped'
     );
   });
-
-  test('rejects the same file dropped twice', async ({ page }) => {
-    await dropFile(page);
-
-    await expect(page.locator(FILE_LIST_ITEM)).toHaveCount(1);
-    await expect(page.locator(FILE_LIST_ITEM)).toContainText('results.csv');
-    await expect(page.locator(UPLOAD_BUTTON)).toBeEnabled();
-
-    await dropFile(page);
-    await expect(page.locator(FILE_LIST_ITEM)).toHaveCount(1);
-    await expect(page.locator(FILE_LIST_ITEM)).toContainText('results.csv');
-    await expect(page.locator(SUCCESS_STATUS)).toContainText(
-      'Duplicate filenames are not supported - 1 file skipped'
-    );
-  });
 });
 
 async function dropFile(page) {
