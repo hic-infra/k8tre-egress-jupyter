@@ -123,24 +123,15 @@ test.describe('Drag-and-drop file upload', () => {
   });
 
   test('rejects the same file dropped twice', async ({ page }) => {
-    const file = {
-      filename: 'results.csv',
-      type: 'file',
-      format: 'text',
-      content: 'a,b,c\n1,2,3'
-    };
-
-    const file2 = {
-      filename: 'results.csv',
-      type: 'file',
-      format: 'text',
-      content: 'a,b,c\n1,2,3'
-    };
-    await dropFiles(page, [file, file2]);
+    await dropFile(page);
 
     await expect(page.locator(FILE_LIST_ITEM)).toHaveCount(1);
     await expect(page.locator(FILE_LIST_ITEM)).toContainText('results.csv');
     await expect(page.locator(UPLOAD_BUTTON)).toBeEnabled();
+
+    await dropFile(page);
+    await expect(page.locator(FILE_LIST_ITEM)).toHaveCount(1);
+    await expect(page.locator(FILE_LIST_ITEM)).toContainText('results.csv');
     await expect(page.locator(SUCCESS_STATUS)).toContainText(
       'Duplicate filenames are not supported - 1 file skipped'
     );
