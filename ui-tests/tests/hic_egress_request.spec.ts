@@ -151,6 +151,9 @@ async function dropFiles(page, files: DropFile[]) {
     const fileItem = await page.locator('.jp-DirListing-item', {
       hasText: f.filename
     });
+
+    await fileItem.waitFor({ state: 'visible', timeout: 5000 });
+
     const dropzone = page.locator(DROPZONE);
 
     const source = await fileItem.boundingBox();
