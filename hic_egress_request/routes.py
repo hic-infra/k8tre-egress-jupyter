@@ -8,11 +8,6 @@ from tornado.web import HTTPError
 import os
 import httpx
 
-from hic_egress_request.logging import get_logger, setup_logging
-
-setup_logging()
-logger = get_logger(__name__)
-
 
 class EgressRequestHandler(APIHandler):
     config = EgressRequestConfig()
