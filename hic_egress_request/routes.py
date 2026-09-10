@@ -8,35 +8,43 @@ from tornado.web import HTTPError
 import os
 import httpx
 
+from hic_egress_request.logging import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
+
 
 class EgressRequestHandler(APIHandler):
     config = EgressRequestConfig()
 
     @tornado.web.authenticated
     def post(self):
-        data = self.get_json_body()
+        try:
+            data = self.get_json_body()
 
-        if data is None:
-            raise HTTPError(400, reason="Request body must be valid JSON")
+            if data is None:
+                raise HTTPError(400, reason="Request body must be valid JSON")
 
-        paths = data.get("paths", [])
-        if not paths:
-            raise HTTPError(400, reason="No paths provided")
+            paths = data.get("paths", [])
+            if not paths:
+                raise HTTPError(400, reason="No paths provided")
 
-        paths = list(map(self._resolve_local_path, paths))
+            paths = list(map(self._resolve_local_path, paths))
 
-        user_token = os.environ.get("JUPYTERHUB_API_TOKEN")
-        with httpx.Client() as client:
-            resp = client.post(
-                f"{self.config.hic_egress_creation_service_url}/create-egress",
-                headers={"Authorization": f"token {user_token}"},
-            )
-        data = resp.json()
-        session_id = data["token"]
-        uploaded = []
-        for path in paths:
+            user_token = os.environ.get("JUPYTERHUB_API_TOKEN")
             with httpx.Client() as client:
-                try:
+                resp = client.post(
+                    f"{self.config.hic_egress_creation_service_url}/create-egress",
+                    headers={"Authorization": f"token {user_token}"},
+                )
+
+            data = resp.json()
+            session_id = data["token"]
+            self.log.info(f"Created egress id {session_id}")
+
+            uploaded = []
+            for path in paths:
+                with httpx.Client() as client:
                     with open(path, "rb") as f:
                         files = {"file": f}
                         resp = client.post(
@@ -45,18 +53,25 @@ class EgressRequestHandler(APIHandler):
                             data={"session_id": session_id},
                             files=files,
                         )
+                        self.log.info(f"Uploading file {path}")
                         uploaded.append(f)
-                except FileNotFoundError as e:
-                    raise HTTPError(400, reason="File not found")
 
-        with httpx.Client() as client:
-            resp = client.post(
-                f"{self.config.hic_egress_creation_service_url}/request-egress",
-                headers={"Authorization": f"token {user_token}"},
-                data={"session_id": session_id},
-            )
-        self.set_status(resp.status_code)
-        self.finish(resp.text)
+            with httpx.Client() as client:
+                resp = client.post(
+                    f"{self.config.hic_egress_creation_service_url}/request-egress",
+                    headers={"Authorization": f"token {user_token}"},
+                    data={"session_id": session_id},
+                )
+            self.log.info(f"Finished egress id {session_id}")
+
+            self.set_status(resp.status_code)
+            self.finish(resp.text)
+        except FileNotFoundError as e:
+            self.log.error(f"Could not find file {e} to upload")
+            raise HTTPError(400, reason="File not found")
+        except httpx.RequestError as e:
+            self.log.error(f"Failed to connect to egress creation service {e}")
+            raise HTTPError(500, reason="Could not connect to egress creation service")
 
     @tornado.web.authenticated
     def get(self):
