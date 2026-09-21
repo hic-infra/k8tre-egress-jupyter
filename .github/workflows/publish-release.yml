@@ -1,23 +1,13 @@
 name: "Step 2: Publish Release"
 on:
   workflow_dispatch:
-    inputs:
-      branch:
-        description: "The target branch"
-        required: false
-      release_url:
-        description: "The URL of the draft GitHub release"
-        required: false
-      steps_to_skip:
-        description: "Comma separated list of steps to skip"
-        required: false
 
 jobs:
   publish_release:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/hic-k8tre-egress-jupyter
+      url: https://pypi.org/p/hic-egress-request
     permissions:
       id-token: write
     steps:
